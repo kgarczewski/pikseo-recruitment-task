@@ -4,6 +4,7 @@ import requests
 from persons.models import Skills, Persons
 from .forms import NameForm
 from django.views import View
+from django.db.models import Prefetch
 
 
 def main(request):
@@ -11,9 +12,18 @@ def main(request):
 
 
 class SkillList(ListView):
-    queryset = Skills.objects.all()
     template_name = "skills.html"
     context_object_name = "skills"
+
+    def get_queryset(self):
+        """
+        Prefetch the persons_set and, using select_related, also fetch the related
+        position for each person to solve the N+1 query issue.
+        """
+        return Skills.objects.prefetch_related(
+            Prefetch('persons_set',
+                            queryset=Persons.objects.select_related('position'))
+        )
 
 
 class AgeUpdateView(View):
