@@ -1,6 +1,6 @@
 from django.urls import path
 
-from persons.views import main, SkillList, AgeUpdateView, PersonsListView
+from persons.views import AgeUpdateView, PersonsListView, SkillList, main
 
 app_name = "persons"
 urlpatterns = [

@@ -6,19 +6,27 @@ from persons.models import Persons
 class Command(BaseCommand):
     help = 'Export persons data along with their skills and positions to a CSV file'
 
+    def add_arguments(self, parser):
+        parser.add_argument(
+            '--file_path',
+            type=str,
+            default='persons_data.csv',
+            help='The file path for the CSV output'
+        )
+
     def handle(self, *args, **kwargs):
         """
         Handle the command to export persons data to a CSV file.
 
         This method fetches all persons from the database, including their related
-        skills and positions, and writes the data to a CSV file named 'persons_data.csv'.
+        skills and positions, and writes the data to a CSV file.
         Each person's skills are listed as a comma-separated string, and positions
         are included by name.
         """
-        filename = 'persons_data.csv'
+        file_path = kwargs['file_path']
 
         # Open the CSV file for writing
-        with open(filename, 'w', newline='') as csvfile:
+        with open(file_path, 'w', newline='') as csvfile:
             # Create a CSV writer
             csvwriter = csv.writer(csvfile)
 
@@ -38,4 +46,4 @@ class Command(BaseCommand):
                     [idx, person.first_name, person.last_name, skills, position])
 
         self.stdout.write(
-            self.style.SUCCESS(f'Successfully exported data to {filename}'))
+            self.style.SUCCESS(f'Successfully exported data to {file_path}'))
