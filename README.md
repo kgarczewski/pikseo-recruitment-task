@@ -17,3 +17,20 @@ Wyświetl tabelę z kolumnami „imię”, „nazwisko”, „wiek”, posortowa
     Lp. | imię | nazwisko | umiejętności po przecinku | pozycja 
 
 #### Dużym plusem będzie napisanie testów jednostkowych do zaimplementowancyh zmian (rekomendowane użycie pytest).
+
+
+
+
+## Running Tests
+
+To run the tests, use the following command:
+
+```bash
+python -m pytest
+```
+
+## Extra scripts:
+- To export data to CSV, use the following command:
+```bash
+python manage.py export_persons_data
+```
