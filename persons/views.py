@@ -1,13 +1,18 @@
+import logging
+
 import requests
 from django.db.models import Prefetch, QuerySet
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import redirect, render
 from django.views import View
 from django.views.generic import ListView
+from requests.exceptions import RequestException
 
 from persons.models import Persons, Skills
 
 from .forms import NameForm
+
+logger = logging.getLogger("persons")
 
 
 def main(request):
@@ -57,11 +62,20 @@ class AgeUpdateView(View):
         form = NameForm(request.POST)
         if form.is_valid():
             name = form.cleaned_data["name"]
-            response = requests.get(f"https://api.agify.io/?name={name}")
-            data = response.json()
-            age = data.get("age")
-            Persons.objects.filter(first_name=name).update(age=age)
-            return redirect("persons:age_list")
+            try:
+                response = requests.get(f"https://api.agify1.io/?name={name}")
+                response.raise_for_status()
+                data = response.json()
+                age = data.get("age")
+                Persons.objects.filter(first_name=name).update(age=age)
+                return redirect("persons:age_list")
+            except RequestException:
+                logger.error("Error fetching age data from API", exc_info=True)
+                form.add_error(
+                    None,
+                    "There was an error fetching the age data. "
+                    "Please try again later.",
+                )
         return render(request, self.template_name, {"form": form})
 
 
