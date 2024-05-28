@@ -1,7 +1,9 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.views.generic import ListView
-
-from persons.models import Skills
+import requests
+from persons.models import Skills, Persons
+from .forms import NameForm
+from django.views import View
 
 
 def main(request):
@@ -12,3 +14,51 @@ class SkillList(ListView):
     queryset = Skills.objects.all()
     template_name = "skills.html"
     context_object_name = "skills"
+
+
+class AgeUpdateView(View):
+    """
+    View to handle the age update form and API interaction.
+
+    This view serves an age update form on GET request and processes the form on POST request.
+    Upon form submission, it fetches the age of a person from an external API using the provided
+    name, updates this age in the database, and redirects to a list of all persons sorted by age.
+    """
+    template_name = 'age_form.html'
+
+    def get(self, request):
+        """
+        Handle GET requests: render the form for age update.
+        """
+        form = NameForm()
+        return render(request, self.template_name, {'form': form})
+
+    def post(self, request):
+        """
+        Handle POST requests: process the age update form.
+
+        Validates the form, fetches the age using an external API, updates the age in the database
+        for all matching records, and redirects to the age list view.
+        """
+        form = NameForm(request.POST)
+        if form.is_valid():
+            name = form.cleaned_data['name']
+            response = requests.get(f'https://api.agify.io/?name={name}')
+            data = response.json()
+            age = data.get('age')
+            Persons.objects.filter(first_name=name).update(age=age)
+            return redirect('persons:age_list')
+        return render(request, self.template_name, {'form': form})
+
+
+class PersonsListView(ListView):
+    """
+    View to display a list of persons sorted by their age.
+
+    This view lists persons excluding those without an age specified, sorted in ascending order by age.
+    It utilizes Django's generic ListView for displaying the sorted list.
+    """
+    model = Persons
+    template_name = "persons_list.html"
+    context_object_name = "persons"
+    queryset = Persons.objects.exclude(age__isnull=True).order_by('age')

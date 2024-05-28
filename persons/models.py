@@ -16,3 +16,4 @@ class Persons(models.Model):
     position = models.ForeignKey(
         Position, verbose_name="Stanowisko", null=True, on_delete=models.SET_NULL
     )
+    age = models.IntegerField(verbose_name="Wiek", null=True, blank=True)

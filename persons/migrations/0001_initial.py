@@ -30,34 +30,35 @@ def fill_models_with_data(apps, *args, **kwargs) -> None:
     Position = apps.get_model('persons', 'Position')  # noqa
     Persons = apps.get_model('persons', 'Persons')  # noqa
 
+    # Create and save positions
     positions_to_create = []
     for position in _unique_positions():
         positions_to_create.append(Position(name=position))
-
     Position.objects.bulk_create(positions_to_create)
 
+    # Fetch saved positions
+    saved_positions = list(Position.objects.all())
+
+    # Create and save skills
     skills_to_create = []
     for skill in _skills:
         skills_to_create.append(Skills(name=skill))
-
     Skills.objects.bulk_create(skills_to_create)
 
-    persons_to_create = []
+    # Fetch saved skills
+    saved_skills = list(Skills.objects.all())
+
+    # Create and save persons individually to ensure they have an ID
     for _ in range(100):
-        persons_to_create.append(
-            Persons(
-                first_name=fake.first_name(),
-                last_name=fake.last_name(),
-                position=random.choice(positions_to_create),
-            )
+        person = Persons(
+            first_name=fake.first_name(),
+            last_name=fake.last_name(),
+            position=random.choice(saved_positions),
         )
+        person.save()
 
-    Persons.objects.bulk_create(persons_to_create)
-
-    for person in persons_to_create:
-        for skill in set(random.choices(skills_to_create, k=3)):
-            person.skills.add(skill)
-
+        # Add skills to persons
+        person.skills.add(*set(random.choices(saved_skills, k=3)))
         person.save()
 
 
