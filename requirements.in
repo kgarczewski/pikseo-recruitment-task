@@ -1,0 +1,4 @@
+Django==5.0.6
+django-bootstrap5==24.2
+Faker==25.2.0
+pip-tools==7.4.1
