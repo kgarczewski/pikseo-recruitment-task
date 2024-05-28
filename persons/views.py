@@ -63,7 +63,7 @@ class AgeUpdateView(View):
         if form.is_valid():
             name = form.cleaned_data["name"]
             try:
-                response = requests.get(f"https://api.agify1.io/?name={name}")
+                response = requests.get(f"https://api.agify.io/?name={name}")
                 response.raise_for_status()
                 data = response.json()
                 age = data.get("age")
